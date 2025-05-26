@@ -1,54 +1,34 @@
-# React + TypeScript + Vite
+# 🧪 React App - Login y Registro
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Este proyecto es una aplicación en React que incluye formularios de **login** y **registro**, integrados con un backend (mock o real) para pruebas de autenticación.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 🚀 Cómo ejecutar el proyecto
 
-## Expanding the ESLint configuration
+Sigue estos pasos:
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+1. **Clona el repositorio o accede al directorio del proyecto:**
 
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+   ```bash
+   cd nombre-del-proyecto
+   ```
+2. **Instala las dependencias**
+  
+  ```bash
+    npm install
+  ```
+
+3. **Correr el proyecto en modo desarollo**
+```bash
+  npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+La app estará disponible en http://localhost:5173 (si usas Vite) o http://localhost:3000 (si usas Create React App).
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+🔐 Autenticación
+Al hacer login exitoso, se guarda un token en localStorage.
 
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    'react-x': reactX,
-    'react-dom': reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs['recommended-typescript'].rules,
-    ...reactDom.configs.recommended.rules,
-  },
-})
-```
+Solo los usuarios autenticados pueden acceder a la ruta principal /.
+
+Si no hay token, el usuario es redirigido al login (/login).
