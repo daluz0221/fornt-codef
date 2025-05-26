@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form';
 
 
 type FormValues = {
-  id: number;
+  cedula: number;
   names: string;
   lastNames: string;
   departments: string;
@@ -48,7 +48,7 @@ export const Registerform = () => {
           name: dpto.name,
           id: dpto.id
         })).sort((a, b) => a.name.localeCompare(b.name));
-        console.log(sortedData);
+ 
         setDepartments(sortedData);
 
 
@@ -92,18 +92,42 @@ export const Registerform = () => {
 
   const onSubmit = (data: FormValues) => {
     console.log("Datos del formulario:", data);
+    const resp = fetch('http://localhost:8080/auth/register', {
+      method: 'POST',
+      body: JSON.stringify(data),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    }).then((response) => {
+      if (!response.ok) {
+        throw new Error('Error al registrar usuario');
+      }
+      return response.json();
+    }).then((data) => {
+      console.log("Respuesta del servidor:", data);
+      window.location.href = '/login';
+      alert("Usuario registrado correctamente");
+     
+    }).catch((error) => {
+      console.error("Error al registrar usuario:", error);
+      alert("Error al registrar usuario");
+    });
+
   };
+
+
+
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 w-100 mr-10 ml-10 mb-10 mt-5">
       <div>
         <label className="block font-bold mb-1">Cédula</label>
         <input
-          {...register("id", { required: 'Este campo es obligatorio' })}
+          {...register("cedula", { required: 'Este campo es obligatorio' })}
           className="border p-4 border-gray-300 focus:border-blue-900 outline-none rounded w-full"
           placeholder='Ingresa tu número de cédula'
         />
-        {errors.id && (
-          <span className="text-red-500">{errors.id.message}</span>
+        {errors.cedula && (
+          <span className="text-red-500">{errors.cedula.message}</span>
         )}
       </div>
 
@@ -122,11 +146,13 @@ export const Registerform = () => {
       <div>
         <label className="block font-bold mb-1">Apellidos</label>
         <input
-          {...register("lastNames")}
+          {...register("lastNames", { required: 'Este campo es obligatorio' })}
           className="border p-4 border-gray-300 focus:border-blue-900 outline-none rounded w-full"
           placeholder='Ingresa tus apellidos'
         />
-
+        {errors.lastNames && (
+          <span className="text-red-500">{errors.lastNames.message}</span>
+        )}
       </div>
 
 
@@ -194,6 +220,9 @@ export const Registerform = () => {
           className="border p-4 border-gray-300 focus:border-blue-900 outline-none rounded w-full"
           placeholder="Ingresa tu número de celular"
         />
+        {errors.cellphone && (
+          <span className="text-red-500">{errors.cellphone.message}</span>
+        )}
       </div>
 
       <div className="relative">

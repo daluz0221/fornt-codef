@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 
 type FormValues = {
-    id: string;
+    cedula: string;
     password: string;
 };
 
@@ -12,10 +12,48 @@ export const LoginForm = () => {
     const { register, handleSubmit, watch, formState: { errors } } = useForm<FormValues>();
 
     const [showPassword, setShowPassword] = useState(false);
+    const [loginTries, setLoginTries] = useState(1);
 
-    const onSubmit = (data: FormValues) => {
+
+    const onSubmit = async(data: FormValues) => {
         console.log("Datos del formulario:", data);
-      };
+
+        const resp = await fetch('http://localhost:8080/auth/login', {
+            method: 'POST',
+            body: JSON.stringify(data),
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        }).then((response) => {
+            if (!response.ok) {
+                throw new Error('Error al iniciar sesión');
+            }
+            return response.json();
+        }
+        ).then((data) => {
+            console.log("Respuesta del servidor:", data);
+            if (data.token) {
+                localStorage.setItem('token', data.token);
+                window.location.href = '/';
+            } else {
+                alert("Credenciales incorrectas");
+            }
+        }
+        ).catch((error) => {
+            console.error("Error al iniciar sesión:", error);
+            setLoginTries((prev) => prev + 1);
+            console.log("Intentos de inicio de sesión:", loginTries);
+            alert("Error al iniciar sesión");
+            
+            if (loginTries >= 3) {
+                alert("Has alcanzado el número máximo de intentos. Por favor, inténtalo más tarde.");
+               
+            }
+        }
+        );
+
+
+    };
 
 
     
@@ -24,7 +62,7 @@ export const LoginForm = () => {
             <div>
                 <label className="block font-bold mb-1">Número de Cédula</label>
                 <input
-                    {...register("id", { required: 'Este campo es obligatorio', validate:{
+                    {...register("cedula", { required: 'Este campo es obligatorio', validate:{
                         isNumber: (value) => {
                             const regex = /^[0-9]+$/;
                             return regex.test(value) || "El número de cédula debe ser numérico";
@@ -33,8 +71,8 @@ export const LoginForm = () => {
                     className="border p-4 border-gray-300 focus:border-blue-900 outline-none rounded w-full"
                     placeholder='Ingresa tu número de cédula'
                 />
-                {errors.id && (
-                    <span className="text-red-500">{errors.id.message}</span>
+                {errors.cedula && (
+                    <span className="text-red-500">{errors.cedula.message}</span>
                 )}
             </div>
 
