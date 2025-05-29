@@ -3,14 +3,14 @@ import { useForm } from 'react-hook-form';
 
 
 type FormValues = {
-  cedula: number;
-  names: string;
-  lastNames: string;
-  departments: string;
+  username: number;
+  firstName: string;
+  lastName: string;
+  department: string;
   city: string;
   address: string;
   email: string;
-  cellphone: number;
+  numberPhone: number;
   password: string;
 };
 
@@ -34,7 +34,7 @@ export const Registerform = () => {
   const [showPassword, setShowPassword] = useState(false);
 
 
-  const selectedDepartmentId = watch("departments");
+  const selectedDepartmentId = watch("department");
   const passwordValue = watch("password") || "";
 
 
@@ -122,36 +122,36 @@ export const Registerform = () => {
       <div>
         <label className="block font-bold mb-1">Cédula</label>
         <input
-          {...register("cedula", { required: 'Este campo es obligatorio' })}
+          {...register("username", { required: 'Este campo es obligatorio' })}
           className="border p-4 border-gray-300 focus:border-blue-900 outline-none rounded w-full"
           placeholder='Ingresa tu número de cédula'
         />
-        {errors.cedula && (
-          <span className="text-red-500">{errors.cedula.message}</span>
+        {errors.username && (
+          <span className="text-red-500">{errors.username.message}</span>
         )}
       </div>
 
       <div>
         <label className="block font-bold mb-1">Nombres</label>
         <input
-          {...register("names", { required: 'Este campo es obligatorio' })}
+          {...register("firstName", { required: 'Este campo es obligatorio' })}
           className="border p-4 border-gray-300 focus:border-blue-900 outline-none rounded w-full"
           placeholder='Ingresa tu nombre'
         />
-        {errors.names && (
-          <span className="text-red-500">{errors.names.message}</span>
+        {errors.firstName && (
+          <span className="text-red-500">{errors.firstName.message}</span>
         )}
       </div>
 
       <div>
         <label className="block font-bold mb-1">Apellidos</label>
         <input
-          {...register("lastNames", { required: 'Este campo es obligatorio' })}
+          {...register("lastName", { required: 'Este campo es obligatorio' })}
           className="border p-4 border-gray-300 focus:border-blue-900 outline-none rounded w-full"
           placeholder='Ingresa tus apellidos'
         />
-        {errors.lastNames && (
-          <span className="text-red-500">{errors.lastNames.message}</span>
+        {errors.lastName && (
+          <span className="text-red-500">{errors.lastName.message}</span>
         )}
       </div>
 
@@ -159,7 +159,7 @@ export const Registerform = () => {
       <div>
         <label className="block font-bold mb-1 text-sm font-medium">Departamento</label>
         <select
-          {...register("departments", { required: "Este campo es obligatorio" })}
+          {...register("department", { required: "Este campo es obligatorio" })}
           className="w-full border p-4 border-gray-300 focus:border-blue-900 outline-none rounded"
           defaultValue=""
         >
@@ -170,7 +170,7 @@ export const Registerform = () => {
             </option>
           ))}
         </select>
-        {errors.departments && <p className="text-red-500">{errors.departments.message}</p>}
+        {errors.department && <p className="text-red-500">{errors.department.message}</p>}
       </div>
 
       <div>
@@ -216,12 +216,12 @@ export const Registerform = () => {
       <div>
         <label className="block font-bold mb-1">Celular</label>
         <input
-          {...register("cellphone")}
+          {...register("numberPhone")}
           className="border p-4 border-gray-300 focus:border-blue-900 outline-none rounded w-full"
           placeholder="Ingresa tu número de celular"
         />
-        {errors.cellphone && (
-          <span className="text-red-500">{errors.cellphone.message}</span>
+        {errors.numberPhone && (
+          <span className="text-red-500">{errors.numberPhone.message}</span>
         )}
       </div>
 

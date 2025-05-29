@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 
 type FormValues = {
-    cedula: string;
+    username: string;
     password: string;
 };
 
@@ -26,6 +26,7 @@ export const LoginForm = () => {
             },
         }).then((response) => {
             if (!response.ok) {
+                console.log(data)
                 throw new Error('Error al iniciar sesión');
             }
             return response.json();
@@ -40,6 +41,7 @@ export const LoginForm = () => {
             }
         }
         ).catch((error) => {
+            console.log(data)
             console.error("Error al iniciar sesión:", error);
             setLoginTries((prev) => prev + 1);
             console.log("Intentos de inicio de sesión:", loginTries);
@@ -62,7 +64,7 @@ export const LoginForm = () => {
             <div>
                 <label className="block font-bold mb-1">Número de Cédula</label>
                 <input
-                    {...register("cedula", { required: 'Este campo es obligatorio', validate:{
+                    {...register("username", { required: 'Este campo es obligatorio', validate:{
                         isNumber: (value) => {
                             const regex = /^[0-9]+$/;
                             return regex.test(value) || "El número de cédula debe ser numérico";
@@ -71,8 +73,8 @@ export const LoginForm = () => {
                     className="border p-4 border-gray-300 focus:border-blue-900 outline-none rounded w-full"
                     placeholder='Ingresa tu número de cédula'
                 />
-                {errors.cedula && (
-                    <span className="text-red-500">{errors.cedula.message}</span>
+                {errors.username && (
+                    <span className="text-red-500">{errors.username.message}</span>
                 )}
             </div>
 
