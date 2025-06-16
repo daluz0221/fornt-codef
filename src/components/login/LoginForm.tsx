@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 
 type FormValues = {
-    username: string;
+    dni: string;
     password: string;
 };
 
@@ -15,17 +15,23 @@ export const LoginForm = () => {
     const [loginTries, setLoginTries] = useState(1);
 
 
-    const onSubmit = async(data: FormValues) => {
+    const onSubmit = async (data: FormValues) => {
         console.log("Datos del formulario:", data);
+        
+        localStorage.removeItem("codeExpiration"); // limpiar si ya no se necesita
 
-        const resp = await fetch('http://localhost:8080/auth/login', {
+        const resp = await fetch('https://citasalud-back.onrender.com/auth/login', {
             method: 'POST',
             body: JSON.stringify(data),
             headers: {
                 'Content-Type': 'application/json',
             },
         }).then((response) => {
-            if (!response.ok) {
+            console.log(response);
+            setTimeout(() => {
+              
+            }, 2000)
+            if (!response) {
                 console.log(data)
                 throw new Error('Error al iniciar sesión');
             }
@@ -33,9 +39,9 @@ export const LoginForm = () => {
         }
         ).then((data) => {
             console.log("Respuesta del servidor:", data);
-            if (data.token) {
+            if (data.email) {
                 localStorage.setItem('token', data.token);
-                window.location.href = '/';
+                window.location.href = '/validar-email';
             } else {
                 alert("Credenciales incorrectas");
             }
@@ -46,10 +52,10 @@ export const LoginForm = () => {
             setLoginTries((prev) => prev + 1);
             console.log("Intentos de inicio de sesión:", loginTries);
             alert("Error al iniciar sesión");
-            
+
             if (loginTries >= 3) {
                 alert("Has alcanzado el número máximo de intentos. Por favor, inténtalo más tarde.");
-               
+
             }
         }
         );
@@ -58,23 +64,25 @@ export const LoginForm = () => {
     };
 
 
-    
+
     return (
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 w-100 mr-10 ml-10 mb-10 mt-5">
             <div>
                 <label className="block font-bold mb-1">Número de Cédula</label>
                 <input
-                    {...register("username", { required: 'Este campo es obligatorio', validate:{
-                        isNumber: (value) => {
-                            const regex = /^[0-9]+$/;
-                            return regex.test(value) || "El número de cédula debe ser numérico";
-                        },
-                    } })}
+                    {...register("dni", {
+                        required: 'Este campo es obligatorio', validate: {
+                            isNumber: (value) => {
+                                const regex = /^[0-9]+$/;
+                                return regex.test(value) || "El número de cédula debe ser numérico";
+                            },
+                        }
+                    })}
                     className="border p-4 border-gray-300 focus:border-blue-900 outline-none rounded w-full"
                     placeholder='Ingresa tu número de cédula'
                 />
-                {errors.username && (
-                    <span className="text-red-500">{errors.username.message}</span>
+                {errors.dni && (
+                    <span className="text-red-500">{errors.dni.message}</span>
                 )}
             </div>
 
@@ -84,7 +92,7 @@ export const LoginForm = () => {
                     type={showPassword ? "text" : "password"}
                     {...register("password", {
                         required: "Este campo es obligatorio",
-                       
+
                     })}
                     className="border p-4 border-gray-300 focus:border-blue-900 outline-none rounded w-full"
                     placeholder='Ingresa tu contraseña'
@@ -100,7 +108,7 @@ export const LoginForm = () => {
                     <span className="text-red-500">{errors.password.message}</span>
                 )}
             </div>
-            
+
 
             <button type="submit" className="bg-blue-500 w-full rounded-2xl text-white p-4 border-gray-300 focus:border-blue-900 outline-none hover:bg-blue-600 transition-all duration-300">
                 Iniciar Sesión

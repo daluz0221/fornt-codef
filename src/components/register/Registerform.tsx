@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form';
 
 
 type FormValues = {
-  username: number;
+  dni: number;
   firstName: string;
   lastName: string;
   department: string;
@@ -92,9 +92,20 @@ export const Registerform = () => {
 
   const onSubmit = (data: FormValues) => {
     console.log("Datos del formulario:", data);
-    const resp = fetch('http://localhost:8080/auth/register', {
+
+    const dpto = data.department
+    const dptoName = departments.filter( dpt => dpt.id === +dpto )
+    const newData = {
+      ...data,
+      department: dptoName[0].name
+    }
+
+    console.log(newData);
+    
+
+    const resp = fetch('https://citasalud-back.onrender.com/auth/register', {
       method: 'POST',
-      body: JSON.stringify(data),
+      body: JSON.stringify(newData),
       headers: {
         'Content-Type': 'application/json',
       },
@@ -105,7 +116,7 @@ export const Registerform = () => {
       return response.json();
     }).then((data) => {
       console.log("Respuesta del servidor:", data);
-      window.location.href = '/login';
+      window.location.href = '/validate-email';
       alert("Usuario registrado correctamente");
      
     }).catch((error) => {
@@ -122,12 +133,12 @@ export const Registerform = () => {
       <div>
         <label className="block font-bold mb-1">Cédula</label>
         <input
-          {...register("username", { required: 'Este campo es obligatorio' })}
+          {...register("dni", { required: 'Este campo es obligatorio' })}
           className="border p-4 border-gray-300 focus:border-blue-900 outline-none rounded w-full"
           placeholder='Ingresa tu número de cédula'
         />
-        {errors.username && (
-          <span className="text-red-500">{errors.username.message}</span>
+        {errors.dni && (
+          <span className="text-red-500">{errors.dni.message}</span>
         )}
       </div>
 
