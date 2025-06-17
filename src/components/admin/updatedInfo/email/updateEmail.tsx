@@ -40,7 +40,7 @@ export const UpdateEmail = () => {
         <input
           type="text"
           readOnly
-          value={`currentEmail`}
+          value={`${ localStorage.getItem("email") || "No disponible"}`}
           className="w-full bg-gray-100 border border-gray-300 rounded px-4 py-2 text-gray-700"
         />
       </div>

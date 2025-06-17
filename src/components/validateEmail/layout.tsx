@@ -14,7 +14,7 @@ export const ValidateEmailLayout = () => {
     myHeaders.append("Content-Type", "application/json");
 
     const raw = JSON.stringify({
-      "email": "lfelipe.echeverry@udea.edu.co",
+      "email": localStorage.getItem("email"),
       "code": code
     });
 
@@ -31,15 +31,12 @@ export const ValidateEmailLayout = () => {
   
       console.log(data);
       if (data){
-        localStorage.setItem('userToken', data.token)
+        localStorage.setItem('userToken', data)
         window.location.href = '/'
       }
     } catch (error) {
       console.error("Error al verificar el código:", error);
     }
-
-
-
 
   }
   return (

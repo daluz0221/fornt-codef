@@ -27,10 +27,7 @@ export const LoginForm = () => {
                 'Content-Type': 'application/json',
             },
         }).then((response) => {
-            console.log(response);
-            setTimeout(() => {
-              
-            }, 2000)
+    
             if (!response) {
                 console.log(data)
                 throw new Error('Error al iniciar sesión');
@@ -40,7 +37,7 @@ export const LoginForm = () => {
         ).then((data) => {
             console.log("Respuesta del servidor:", data);
             if (data.email) {
-                localStorage.setItem('token', data.token);
+                localStorage.setItem('email', data.email);
                 window.location.href = '/validar-email';
             } else {
                 alert("Credenciales incorrectas");

@@ -5,6 +5,54 @@ import { LiaMapMarkerAltSolid } from "react-icons/lia";
 import { MdOutlineMailOutline } from "react-icons/md";
 
 export const AdminLayout = ({ children }: { children: React.ReactNode }) => {
+
+    
+
+    const userToken = localStorage.getItem("userToken");
+    console.log({userToken});
+    
+
+    const myHeaders = new Headers();
+    myHeaders.append("Content-Type", "application/json")
+    myHeaders.append("Authorization", `Bearer ${userToken}`);
+
+    const requestOptions: RequestInit = {
+        method: "GET",
+        headers: myHeaders,
+        redirect: "follow"
+    };
+
+    const fetchUserProfile = async () => {
+        const resp = await fetch("https://citasalud-back.onrender.com/api/user/profile", requestOptions).then(resp => resp.json()).then(data=> console.log({data})
+        )
+        console.log("Respuesta del servidor:", resp);
+    }
+
+    try {
+
+        const userProfile = fetchUserProfile();
+        console.log("Perfil del usuario:", userProfile);
+
+
+    } catch (error) {
+        console.log({error});
+        
+    }
+
+    const handleUpdateData = () => {
+        window.location.href = '/update-profile';
+        // Aquí puedes agregar la lógica para actualizar los datos del usuario
+    };
+    const handleUpdateEmail = () => {
+        window.location.href = '/update-email';
+        // Aquí puedes agregar la lógica para actualizar el correo del usuario
+    };
+    const handleUpdatePassword = () => {
+        window.location.href = '/update-password';
+        // Aquí puedes agregar la lógica para actualizar la contraseña del usuario
+    };
+
+
     return (
         <div className="h-screen flex flex-col w-full overflow-y-auto bg-white ">
             {/* Top menu */}
@@ -93,15 +141,15 @@ export const AdminLayout = ({ children }: { children: React.ReactNode }) => {
                         <li className=" h-30   rounded-xl mt-8">
                             <div className="flex flex-col space-y-4">
 
-                            <button className="bg-blue-500 px-4 py-2 rounded-xl">
-                                Actualizar Datos
-                            </button>
-                            <button className="bg-blue-500 px-4 py-2 rounded-xl">
-                                Actualizar Correo
-                            </button>
-                            <button className="bg-blue-500 px-4 py-2 mb-10 rounded-xl">
-                                Actualizar Contraseña
-                            </button>
+                                <button onClick={() => handleUpdateData()} className="bg-blue-500 px-4 py-2 rounded-xl">
+                                    Actualizar Datos
+                                </button>
+                                <button onClick={() => handleUpdateEmail()} className="bg-blue-500 px-4 py-2 rounded-xl">
+                                    Actualizar Correo
+                                </button>
+                                <button onClick={() => handleUpdatePassword()} className="bg-blue-500 px-4 py-2 mb-10 rounded-xl">
+                                    Actualizar Contraseña
+                                </button>
                             </div>
                         </li>
                     </ul>

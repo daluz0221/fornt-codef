@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const navigate = useNavigate();
-  const token = localStorage.getItem("token");
+  const token = localStorage.getItem("userToken");
 
   useEffect(() => {
     if (!token) {

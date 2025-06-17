@@ -35,7 +35,7 @@ function App() {
 
           <Route path="/register" element={<RegisterLayout />} />
           <Route path="/login" element={<LoginLayout />} />
-          <Route path="/validate-email" element={<ValidateEmailLayout />} />
+          <Route path="/validar-email" element={<ValidateEmailLayout />} />
           <Route path="*" element={<LoginLayout />} />
         </Routes>
       </Router>
