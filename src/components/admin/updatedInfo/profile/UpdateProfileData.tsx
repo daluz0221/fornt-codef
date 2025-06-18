@@ -1,13 +1,14 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
+import { departamentosColombia } from "../../../../utils/departments";
 
 interface FormData {
-    name: string;
-    lastName: string;
-    departamento: string; // guardamos el ID como string
-    city: string;
-    address: string;
-    phone: string;
+    firstName?: string;
+    lastName?: string;
+    department?: string;
+    city?: string;
+    address?: string;
+    numberPhone?: string;
 }
 
 type Departamento = {
@@ -25,127 +26,225 @@ export const UpdateProfileData = () => {
      * 👉 Ajusta aquí los valores iniciales que traigas de tu backend/estado global
      * Asegúrate de que "departamento" sea el **ID** del departamento como string.
      */
-    const defaultDept = "2"; // Antioquia por ejemplo
-    const defaultCity = "12";
+    const userData = localStorage.getItem("userData");
+    const parsedUserData = userData ? JSON.parse(userData) : {};
+    const { dni, email, department, ...dataToUpdate } = parsedUserData
+
+    const newDpto = departamentosColombia.find(dpto => dpto.name === department);
+    if (newDpto) {
+        dataToUpdate.department = newDpto.id
+    } else {
+        dataToUpdate.department = "";
+    }
+
+
+
 
     const {
         register,
         handleSubmit,
         watch,
         setValue,
-        control,
         formState: { errors },
     } = useForm<FormData>({
-        defaultValues: {
-            name: "Juan",
-            lastName: "Pérez",
-            departamento: defaultDept,
-            city: defaultCity,
-            address: "Calle 50",
-            phone: "6157464",
-        },
+        defaultValues: dataToUpdate
     });
+
+    const normalizeString = (str: string) =>
+        str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
 
     const [success, setSuccess] = useState(false);
     const [loadingCities, setLoadingCities] = useState(false);
     const [departments, setDepartments] = useState<Departamento[]>([]);
     const [cities, setCities] = useState<City[]>([]);
 
+
+    /* flag para saber si estamos en el primer render;
+       así sólo seteamos la ciudad una vez */
+    const isFirstLoad = useRef(true);
+
     // Observamos el departamento seleccionado (ID)
-    const selectedDepartmentId = useWatch({ control, name: "departamento" });
+
 
     /** ---------------------------------------------------------
      * 1️⃣ Cargar departamentos al montar el componente
      * --------------------------------------------------------*/
+    const watchDepartment = watch("department");
+
+
     useEffect(() => {
-        const fetchDepartments = async () => {
-            try {
-                const res = await fetch("https://api-colombia.com/api/v1/Department");
-                if (!res.ok) throw new Error("Error al obtener departamentos");
-
-                const data = await res.json();
-                const mapped: Departamento[] = data
-                    .map((d: any) => ({ id: d.id, name: d.name }))
-                    .sort((a, b) => a.name.localeCompare(b.name));
-        
-
-                setDepartments(mapped);
-
-                /**
-                 * Si el valor por defecto NO existe en la lista (p.e. porque vino vacía la BD),
-                 * seleccionamos el primero para evitar que el campo quede vacío
-                 */
-                const defaultExists = mapped.some((d) => d.id.toString() === defaultDept);
-                setValue("departamento", defaultExists ? defaultDept : mapped[0]?.id.toString() || "");
-            } catch (err) {
-                console.error(err);
+        setDepartments(departamentosColombia);
+        const actualDpto = departamentosColombia.find(dpto => {
+            if (dpto.id === dataToUpdate.department) {
+                return dpto.id
             }
+        });
+
+
+        if (actualDpto) {
+            setTimeout(() => {
+                setValue("department", actualDpto.id.toString());
+            }, 0);
         };
 
-        fetchDepartments();
-    }, [defaultDept, setValue]);
+        const fetchCities = async () => {
+            if (!actualDpto) return;
+
+            setLoadingCities(true);
+            try {
+                const res = await fetch(`https://api-colombia.com/api/v1/Department/${actualDpto.id}/cities`);
+                const data = await res.json();
+
+                const mapped: City[] = data.map((c: any) => ({
+                    id: c.id,
+                    name: c.name,
+                })).sort((a, b) => a.name.localeCompare(b.name));
+
+                setCities(mapped);
+                const actualCity = mapped.find(city => normalizeString(city.name) === normalizeString(dataToUpdate.city || ""));
+                if (actualCity) {
+                    setTimeout(() => {
+                        setValue("city", actualCity.name);
+                    }, 0);
+                }
+            } catch (err: any) {
+                console.error("Error al obtener ciudades:", err.message);
+            } finally {
+                setLoadingCities(false);
+            }
+        }
+
+        fetchCities();
+
+
+
+
+    }, []);
 
     /** ---------------------------------------------------------
      * 2️⃣ Cargar ciudades cada vez que cambie el departamento
      * --------------------------------------------------------*/
+
     useEffect(() => {
+        if (!watchDepartment) {
+            setCities([]);
+            setValue("city", "");          // blank
+            return;
+        };
         const fetchCities = async () => {
-            if (!selectedDepartmentId) return;
+
+
 
             setLoadingCities(true);
             try {
-                const res = await fetch(
-                    `https://api-colombia.com/api/v1/Department/${selectedDepartmentId}/cities`
-                );
+                const res = await fetch(`https://api-colombia.com/api/v1/Department/${watchDepartment}/cities`);
                 const data = await res.json();
 
-                const mapped: City[] = data.map((c: any) => ({ id: c.id, name: c.name })).sort((a, b) => a.name.localeCompare(b.name));
+                const mapped: City[] = data.map((c: any) => ({
+                    id: c.id,
+                    name: c.name,
+                })).sort((a, b) => a.name.localeCompare(b.name));
+
                 setCities(mapped);
-                        console.log('logs ct', mapped);
-                /**
-                 * Establecemos ciudad por defecto: si el usuario tenía una guardada la respetamos,
-                 * de lo contrario la primera de la lista.
-                 */
-                const currentCity = watch("city");
-
-                // Si ya hay una ciudad válida, no hacemos nada
-                const defaultExists = mapped.some((c) => c.id.toString() === currentCity)
-                if (currentCity && defaultExists){
-                    console.log('llego aca');
-                    setValue("city", defaultExists ? defaultCity : mapped[0]?.id.toString() || "");
-                };
-
-                // Si hay una ciudad por defecto válida, la usamos
-                if (defaultCity && mapped.some((c) => c.id.toString() === defaultCity)) {
-                    setValue("city", defaultCity);
-                    return;
+                const actualCity = mapped.find(city => normalizeString(city.name) === normalizeString(dataToUpdate.city || ""));
+                if (actualCity) {
+                    setTimeout(() => {
+                        setValue("city", actualCity.name);
+                    }, 0);
                 }
 
-                
+                if (isFirstLoad.current && dataToUpdate.city) {
+                    const cityMatch = mapped.find(
+                        (c) => normalizeString(c.name) === normalizeString(dataToUpdate.city)
+                    );
+                    if (cityMatch) {
+                        setValue("city", cityMatch.name, { shouldDirty: false });
+                    }
+                    isFirstLoad.current = false; // ya no volvemos a entrar aquí
+                }
 
-                // Si no, seleccionamos la primera disponible
-                setValue("city", mapped[0]?.name || "");
-            } catch (err) {
-                console.error("Error al obtener ciudades:", err);
+                /* ---  B) Cambios posteriores: limpiar selección --- */
+                if (!isFirstLoad.current) {
+                    // Sólo borramos si el usuario cambió de dpto
+                    setValue("city", "", { shouldDirty: true });
+                }
+
+
+            } catch (err: any) {
+                console.error("Error al obtener ciudades:", err.message);
             } finally {
                 setLoadingCities(false);
             }
         };
 
         fetchCities();
-    }, [selectedDepartmentId, setValue, watch]);
+    }, [watchDepartment]);
+
+
 
     /** ---------------------------------------------------------
      * 3️⃣ Envío del formulario
      * --------------------------------------------------------*/
     const onSubmit = (data: FormData) => {
         // Validación de teléfono
-        if (!/^\d{7,15}$/.test(data.phone)) {
+        if (!/^\d{7,15}$/.test(data.numberPhone!)) {
             return alert("Teléfono inválido");
         }
 
-        console.log("Formulario enviado:", data);
-        setSuccess(true);
+        const dpto = data.department;
+        const dptoName = departments.find(dpt => dpt.id === +dpto!);
+        if (!dptoName) {
+            return alert("Departamento inválido");
+        }
+        const newData = {
+            ...data,
+            department: dptoName.name, // Guardamos el nombre del departamento
+        };
+        // Aquí puedes hacer la llamada a tu API para actualizar los datos del usuario
+
+        const userToken = localStorage.getItem("userToken");
+
+        const myHeaders = new Headers();
+        myHeaders.append("Content-Type", "application/json")
+        myHeaders.append("Authorization", `Bearer ${userToken}`);
+
+        const raw = JSON.stringify({
+            "firstName": newData.firstName,
+            "lastName": newData.lastName,
+            "department": newData.department,
+            "city": newData.city,
+            "address": newData.address,
+            "numberPhone": newData.numberPhone
+        });
+
+        const requestOptions: RequestInit = {
+            method: "POST",
+            headers: myHeaders,
+            body: raw,
+            redirect: "follow"
+        };
+
+        const fetchUpdateProfile = async () => {
+
+            try {
+                await fetch("https://citasalud-back.onrender.com/api/user/edit-profile", requestOptions);
+                alert("Datos actualizada correctamente ✅");
+                setTimeout(() => {
+                    window.location.href = '/';
+                }, 2000);
+                return
+
+            } catch (error) {
+                console.log('algo falló, intenta más tarde', error);
+
+            }
+
+        };
+
+        fetchUpdateProfile();
+
+    
+
     };
 
     /** ---------------------------------------------------------
@@ -163,10 +262,10 @@ export const UpdateProfileData = () => {
             <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Nombre</label>
                 <input
-                    {...register("name", { required: "Nombre requerido" })}
+                    {...register("firstName", { required: "Nombre requerido" })}
                     className="w-full border text-black border-gray-300 rounded px-4 py-2 focus:ring-2 focus:ring-blue-500 outline-none"
                 />
-                {errors.name && <p className="text-sm text-red-500">{errors.name.message}</p>}
+                {errors.firstName && <p className="text-sm text-red-500">{errors.firstName.message}</p>}
             </div>
 
             {/* Apellido */}
@@ -180,10 +279,11 @@ export const UpdateProfileData = () => {
             </div>
 
             {/* Departamento */}
+
             <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Departamento</label>
                 <select
-                    {...register("departamento", { required: "Este campo es obligatorio" })}
+                    {...register("department", { required: "Este campo es obligatorio" })}
                     className="w-full text-black border p-3 border-gray-300 rounded focus:border-blue-900 outline-none"
                 >
                     <option value="" disabled>
@@ -195,10 +295,11 @@ export const UpdateProfileData = () => {
                         </option>
                     ))}
                 </select>
-                {errors.departamento && (
-                    <p className="text-sm text-red-500">{errors.departamento.message}</p>
+                {errors.department && (
+                    <p className="text-sm text-red-500">{errors.department.message}</p>
                 )}
             </div>
+
 
             {/* Ciudad */}
             <div>
@@ -234,10 +335,10 @@ export const UpdateProfileData = () => {
             <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Teléfono</label>
                 <input
-                    {...register("phone", { required: "Teléfono requerido" })}
+                    {...register("numberPhone", { required: "Teléfono requerido" })}
                     className="w-full border text-black border-gray-300 rounded px-4 py-2 focus:ring-2 focus:ring-blue-500 outline-none"
                 />
-                {errors.phone && <p className="text-sm text-red-500">{errors.phone.message}</p>}
+                {errors.numberPhone && <p className="text-sm text-red-500">{errors.numberPhone.message}</p>}
             </div>
 
             <button

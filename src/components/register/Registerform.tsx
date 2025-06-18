@@ -50,8 +50,7 @@ export const Registerform = () => {
         })).sort((a, b) => a.name.localeCompare(b.name));
  
         setDepartments(sortedData);
-
-
+    
 
       } catch (err: any) {
         throw new Error(err.message);
@@ -66,7 +65,7 @@ export const Registerform = () => {
     const fetchCities = async () => {
       if (!selectedDepartmentId) return;
 
-      console.log(selectedDepartmentId);
+
 
       setLoadingCities(true);
       try {
@@ -76,7 +75,7 @@ export const Registerform = () => {
         const mapped: City[] = data.map((c: any) => ({
           id: c.id,
           name: c.name,
-        }));
+        })).sort((a, b) => a.name.localeCompare(b.name));
 
         setCities(mapped);
       } catch (err: any) {
@@ -91,7 +90,7 @@ export const Registerform = () => {
 
 
   const onSubmit = (data: FormValues) => {
-    console.log("Datos del formulario:", data);
+  
 
     const dpto = data.department
     const dptoName = departments.filter( dpt => dpt.id === +dpto )
@@ -100,7 +99,7 @@ export const Registerform = () => {
       department: dptoName[0].name
     }
 
-    console.log(newData);
+
     
 
     const resp = fetch('https://citasalud-back.onrender.com/auth/register', {
@@ -115,8 +114,8 @@ export const Registerform = () => {
       }
       return response.json();
     }).then((data) => {
-      console.log("Respuesta del servidor:", data);
-      window.location.href = '/validate-email';
+
+      window.location.href = '/validar-email';
       alert("Usuario registrado correctamente");
      
     }).catch((error) => {

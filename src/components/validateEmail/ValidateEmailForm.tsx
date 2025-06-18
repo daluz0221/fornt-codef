@@ -81,16 +81,10 @@ export const ValidateEmailForm = ({ length, duration, onComplete }: Props) => {
         return `${mins}:${secs.toString().padStart(2, "0")}m`;
     };
 
-    const onSubmitForm = (data: React.FormEvent<HTMLFormElement>) => {
-      
-
-        // console.log(data);
-        
-    };
-
+  
 
     return (
-        <form className="space-y-4 w-100 mr-10 ml-10 mb-10 mt-5" onSubmit={onSubmitForm}>
+        <form className="space-y-4 w-100 mr-10 ml-10 mb-10 mt-5">
 
             <div className="flex flex-col items-center space-y-4">
                 {/* Campos de código */}
@@ -119,9 +113,6 @@ export const ValidateEmailForm = ({ length, duration, onComplete }: Props) => {
                 }
             </div>
 
-            <button type="submit" className="bg-blue-500 w-full rounded-2xl text-white p-4 border-gray-300 focus:border-blue-900 outline-none hover:bg-blue-600 transition-all duration-300">
-                verificar código
-            </button>
         </form>
     )
 }

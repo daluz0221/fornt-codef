@@ -29,8 +29,44 @@ export const UpdatePassword = () => {
     }
 
     // TODO: Llamar tu API para cambiar la contraseña
-    console.log("Cambiar contraseña:", data);
-    alert("Contraseña cambiada ✅");
+
+    const userToken = localStorage.getItem("userToken");
+
+    const myHeaders = new Headers();
+    myHeaders.append("Content-Type", "application/json")
+    myHeaders.append("Authorization", `Bearer ${userToken}`);
+
+    const raw = JSON.stringify({
+      "currentPassword": data.current,
+      "newPassword": data.newPass,
+      "matchPassword": data.confirm
+    });
+
+    const requestOptions: RequestInit = {
+      method: "POST",
+      headers: myHeaders,
+      body: raw,
+      redirect: "follow"
+    };
+    const fetchUpdatePassword = async () => {
+
+      try {
+        await fetch("https://citasalud-back.onrender.com/api/userauth/change-password", requestOptions);
+        console.log("Contraseña actualizada correctamente");
+        alert("Contraseña actualizada correctamente ✅");
+        setTimeout(() => {
+          window.location.href = '/';
+        }, 1000);
+        return
+        
+      } catch (error) {
+        console.log('algo falló, intenta más tarde', error);
+
+      }
+
+    };
+
+    fetchUpdatePassword();
   };
 
   return (

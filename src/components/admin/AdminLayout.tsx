@@ -1,16 +1,38 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { CiUser } from "react-icons/ci";
 import { FaMapMarkerAlt, FaUserEdit } from "react-icons/fa";
 import { LiaMapMarkerAltSolid } from "react-icons/lia";
 import { MdOutlineMailOutline } from "react-icons/md";
 
+
+
+interface DataUser {
+    firstName?: string;
+    lastName?: string;
+    numberPhone?: string;
+    department?: string;
+    city?: string;
+    address?: string;
+}
+
+interface DataDni {
+    dni?: string;
+    email?: string
+}
+
+
+
 export const AdminLayout = ({ children }: { children: React.ReactNode }) => {
 
-    
+
 
     const userToken = localStorage.getItem("userToken");
-    console.log({userToken});
-    
+    const [infoUser, setInfoUser] = useState<DataUser>({});
+    const [dniUser, setDniUser] = useState<DataDni>({});
+
+
+
+
 
     const myHeaders = new Headers();
     myHeaders.append("Content-Type", "application/json")
@@ -23,21 +45,33 @@ export const AdminLayout = ({ children }: { children: React.ReactNode }) => {
     };
 
     const fetchUserProfile = async () => {
-        const resp = await fetch("https://citasalud-back.onrender.com/api/user/profile", requestOptions).then(resp => resp.json()).then(data=> console.log({data})
-        )
-        console.log("Respuesta del servidor:", resp);
+        try {
+            const resp = await fetch("https://citasalud-back.onrender.com/api/user/profile", requestOptions);
+            const resp2 = await fetch("https://citasalud-back.onrender.com/api/userauth/get-user", requestOptions);
+            const data = await resp.json();
+            const data2 = await resp2.json();
+            setInfoUser(data)
+            setDniUser(data2)
+            return
+        } catch (error) {
+            console.log(error);
+
+        }
+    };
+
+    useEffect(() => {
+        fetchUserProfile();
+    }, [])
+
+
+    const userData = {
+        ...infoUser,
+        ...dniUser
     }
 
-    try {
-
-        const userProfile = fetchUserProfile();
-        console.log("Perfil del usuario:", userProfile);
+    localStorage.setItem("userData", JSON.stringify(userData))
 
 
-    } catch (error) {
-        console.log({error});
-        
-    }
 
     const handleUpdateData = () => {
         window.location.href = '/update-profile';
@@ -52,6 +86,15 @@ export const AdminLayout = ({ children }: { children: React.ReactNode }) => {
         // Aquí puedes agregar la lógica para actualizar la contraseña del usuario
     };
 
+    if (Object.keys(infoUser).length === 0 && Object.keys(dniUser).length === 0) {
+        return <p>Cargando...</p>
+    }
+
+
+    const handleLogOut = () => {
+        localStorage.removeItem("token");
+        window.location.href = "/login";
+    }
 
     return (
         <div className="h-screen flex flex-col w-full overflow-y-auto bg-white ">
@@ -64,9 +107,12 @@ export const AdminLayout = ({ children }: { children: React.ReactNode }) => {
                 <div className="flex">
                     <span className="bg-white rounded-full p-2 text-black my-6 mx-6">JP</span>
                     <div className="mt-6">
-                        <h6 className="font-bold text-xl">Juan Pérez</h6>
-                        <p className="text-sm">juan.perez@udea.edu.co</p>
+                        <h6 className="font-bold text-xl">{`${userData.firstName} ${userData.lastName}`}</h6>
+                        <p className="text-sm">{userData.email}</p>
                     </div>
+                    <button onClick={handleLogOut} className="bg-red-900 text-white m-5 p-2 rounded-xl">
+                        Cerrar Sesión
+                    </button>
                 </div>
             </header>
 
@@ -85,19 +131,19 @@ export const AdminLayout = ({ children }: { children: React.ReactNode }) => {
                             <ul className=" p-2">
                                 <div>
                                     <h6 className="text-gray-500 text-sm">Nombre(s)</h6>
-                                    <p>Juan</p>
+                                    <p>{userData.firstName}</p>
                                 </div>
                                 <div>
                                     <h6 className="text-gray-500 mt-2 text-sm">Apellido(s)</h6>
-                                    <p>Pérez</p>
+                                    <p>{userData.lastName}</p>
                                 </div>
                                 <div>
                                     <h6 className="text-gray-500 mt-2 text-sm">Cédula</h6>
-                                    <p>1234567890</p>
+                                    <p>{userData.dni}</p>
                                 </div>
                                 <div>
                                     <h6 className="text-gray-500 mt-2 text-sm">Teléfono</h6>
-                                    <p>300487952</p>
+                                    <p>{userData.numberPhone}</p>
                                 </div>
                             </ul>
                         </li>
@@ -111,15 +157,15 @@ export const AdminLayout = ({ children }: { children: React.ReactNode }) => {
                             <ul className=" p-2">
                                 <div>
                                     <h6 className="text-gray-500 text-sm">Departamento</h6>
-                                    <p>Antioquia</p>
+                                    <p>{userData.department}</p>
                                 </div>
                                 <div>
                                     <h6 className="text-gray-500 mt-2 text-sm">Apellido(s)</h6>
-                                    <p>Pérez</p>
+                                    <p>{userData.city}</p>
                                 </div>
                                 <div>
                                     <h6 className="text-gray-500 mt-2 text-sm">Dirección</h6>
-                                    <p>Calle 50 # 40-20</p>
+                                    <p>{userData.address}</p>
                                 </div>
 
                             </ul>
@@ -134,7 +180,7 @@ export const AdminLayout = ({ children }: { children: React.ReactNode }) => {
                             <ul className=" p-2">
                                 <div>
                                     <h6 className="text-gray-500 text-sm">Correo electrónico</h6>
-                                    <p>juan.perez@udea.edu.co</p>
+                                    <p>{userData.email}</p>
                                 </div>
                             </ul>
                         </li>

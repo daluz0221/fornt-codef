@@ -16,7 +16,7 @@ export const LoginForm = () => {
 
 
     const onSubmit = async (data: FormValues) => {
-        console.log("Datos del formulario:", data);
+
         
         localStorage.removeItem("codeExpiration"); // limpiar si ya no se necesita
 
@@ -29,13 +29,13 @@ export const LoginForm = () => {
         }).then((response) => {
     
             if (!response) {
-                console.log(data)
+          
                 throw new Error('Error al iniciar sesión');
             }
             return response.json();
         }
         ).then((data) => {
-            console.log("Respuesta del servidor:", data);
+  
             if (data.email) {
                 localStorage.setItem('email', data.email);
                 window.location.href = '/validar-email';
@@ -44,7 +44,7 @@ export const LoginForm = () => {
             }
         }
         ).catch((error) => {
-            console.log(data)
+   
             console.error("Error al iniciar sesión:", error);
             setLoginTries((prev) => prev + 1);
             console.log("Intentos de inicio de sesión:", loginTries);

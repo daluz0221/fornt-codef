@@ -8,7 +8,7 @@ export const ValidateEmailLayout = () => {
 
 
   const onComplete = async (code: string) => {
-    console.log('done', code);
+
 
     const myHeaders = new Headers();
     myHeaders.append("Content-Type", "application/json");
@@ -28,8 +28,7 @@ export const ValidateEmailLayout = () => {
       const resp = await fetch("https://citasalud-back.onrender.com/auth/verifyCode", requestOptions).then(resp => resp.json());
 
       const data = resp.token
-  
-      console.log(data);
+
       if (data){
         localStorage.setItem('userToken', data)
         window.location.href = '/'

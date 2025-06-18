@@ -9,6 +9,8 @@ export const UpdateEmail = () => {
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState("");
 
+  const userToken = localStorage.getItem("userToken");
+
   const validateEmail = (email: string) => {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   };
@@ -24,10 +26,48 @@ export const UpdateEmail = () => {
 
     // Aquí iría tu lógica para actualizar el correo, por ejemplo un fetch()
     // Simulación de éxito:
-    setError("");
-    setSuccess(true);
-    console.log("Correo actualizado a:", email);
-  };
+
+    
+
+    const myHeaders = new Headers();
+    myHeaders.append("Content-Type", "application/json")
+    myHeaders.append("Authorization", `Bearer ${userToken}`);
+
+    const raw = JSON.stringify({
+      "email": email
+    });
+
+    const requestOptions: RequestInit = {
+      method: "POST",
+      headers: myHeaders,
+      body: raw,
+      redirect: "follow"
+    };
+    const fetchUpdateEmail = async () => {
+
+      try {
+        await fetch("https://citasalud-back.onrender.com/api/userauth/change-email", requestOptions);
+ 
+        setSuccess(false);
+        setEmail("");
+        setTimeout(() => {
+
+          localStorage.setItem("email", email);
+          window.location.href = '/';
+        }, 100);
+        return
+      } catch (error) {
+        console.log('algo falló, intenta más tarde', error);
+
+      }
+
+    };
+
+    fetchUpdateEmail();
+
+  }
+
+
 
   return (
     <form onSubmit={handleSubmit} className="bg-white shadow-md rounded p-6 w-full max-w-md mx-auto space-y-4">
@@ -40,7 +80,7 @@ export const UpdateEmail = () => {
         <input
           type="text"
           readOnly
-          value={`${ localStorage.getItem("email") || "No disponible"}`}
+          value={`${localStorage.getItem("email") || "No disponible"}`}
           className="w-full bg-gray-100 border border-gray-300 rounded px-4 py-2 text-gray-700"
         />
       </div>
@@ -63,12 +103,12 @@ export const UpdateEmail = () => {
 
       <button
         type="submit"
+        onClick={handleSubmit}
         className="w-full bg-blue-600 text-white py-2 rounded-xl hover:bg-blue-700 transition-all duration-300"
       >
         Guardar cambios
       </button>
 
-      <p className="text-gray-600 text-center">Recibirá un correo de verificación para confirmar el cambio</p>
     </form>
   );
 }
